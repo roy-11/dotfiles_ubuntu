@@ -1,0 +1,30 @@
+# ls
+alias l="eza --color=always --long --git --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias ls="eza -lah -F --git --icons=always"
+alias tree='~/.scripts.sh tree'
+
+# git
+alias gs='git status'
+alias gd='git diff'
+alias gl='~/.scripts.sh gl'
+alias lg='lazygit'
+
+# cd
+alias app='cd ~/App'
+alias desk='cd ~/Desktop'
+
+# neovim
+alias vi='nvim'
+alias vim='nvim'
+
+# tmux
+alias ta='tmux a'
+
+# setup ide or project window 
+alias ide='~/.scripts.sh ide'
+
+# docker
+alias ld='lazydocker'
+
+# others
+alias pwdc='pwd | tr -d "\n" | pbcopy'

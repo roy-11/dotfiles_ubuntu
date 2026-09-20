@@ -1,0 +1,117 @@
+# 共通設定
+source ~/.aliases
+source ~/.variables
+
+# --------------------------------------------------
+# Powerlevel10k instant prompt
+# --------------------------------------------------
+
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+
+# --------------------------------------------------
+# Environment
+# --------------------------------------------------
+
+export EDITOR=nvim
+export VISUAL=nvim
+
+export PATH="$HOME/.local/bin:$PATH"
+
+
+# --------------------------------------------------
+# History
+# --------------------------------------------------
+
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+
+
+# --------------------------------------------------
+# Zinit
+# --------------------------------------------------
+
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+
+if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
+  source "$ZINIT_HOME/zinit.zsh"
+fi
+
+
+# --------------------------------------------------
+# Completion
+# --------------------------------------------------
+
+autoload -Uz compinit
+compinit
+
+
+# --------------------------------------------------
+# Powerlevel10k
+# --------------------------------------------------
+
+zinit ice depth=1
+zinit light romkatv/powerlevel10k
+
+
+# --------------------------------------------------
+# Zsh plugins
+# --------------------------------------------------
+
+# fishのような履歴候補
+zinit light zsh-users/zsh-autosuggestions
+
+# 補完候補をfzf UIで選択
+zinit light Aloxaf/fzf-tab
+
+# syntax highlight
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+
+# --------------------------------------------------
+# fzf
+# --------------------------------------------------
+
+# Ctrl-RはAtuinに使わせる
+export FZF_CTRL_R_COMMAND=
+
+source <(fzf --zsh)
+
+
+# --------------------------------------------------
+# zoxide
+# --------------------------------------------------
+
+eval "$(zoxide init zsh)"
+
+
+# --------------------------------------------------
+# mise
+# --------------------------------------------------
+# eval "$(mise activate zsh)"
+eval "$(~/.local/bin/mise activate zsh)"
+
+
+# --------------------------------------------------
+# Atuin
+# --------------------------------------------------
+# Ctrl + R で履歴検索
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh)"
+fi
+
+
+# --------------------------------------------------
+# Powerlevel10k config
+# --------------------------------------------------
+
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+

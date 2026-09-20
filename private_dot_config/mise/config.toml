@@ -1,0 +1,5 @@
+[tools]
+atuin = "latest"
+chezmoi = "latest"
+node = "lts"
+"npm:@anthropic-ai/claude-code" = "latest"
