@@ -48,3 +48,10 @@ chezmoi apply -v
 ```bash
 mise install
 ```
+
+### 5. Start Espanso
+
+```bash
+espanso service register
+espanso start
+```

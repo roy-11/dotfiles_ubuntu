@@ -27,7 +27,8 @@ sudo apt install -y \
   language-pack-gnome-ja \
   fcitx5 \
   fcitx5-mozc \
-  fcitx5-config-qt
+  fcitx5-config-qt \
+  keyd
 
 sudo update-locale LANG=ja_JP.UTF-8
 

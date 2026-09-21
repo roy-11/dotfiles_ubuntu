@@ -31,6 +31,12 @@ window-rule {
     open-on-workspace "others"
 }
 
+window-rule {
+    geometry-corner-radius 10
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
 // window-rule {
 //     match app-id=r#"(?i)blueman"#
 //     open-floating true

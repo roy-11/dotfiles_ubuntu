@@ -297,7 +297,11 @@ binds {
         close-window;
     }
 
-    Alt+M {
+    Alt+M { 
+        maximize-column;
+    }
+
+    Alt+Shift+M {
         fullscreen-window;
     }
 
@@ -306,7 +310,7 @@ binds {
     }
 
     Alt+Space repeat=false {
-        toggle-overview;
+        spawn "noctalia" "msg" "panel-toggle" "launcher";
     }
 
     Alt+S repeat=false {
@@ -334,6 +338,9 @@ binds {
         focus-column-right;
     }
 
+    Alt+semicolon repeat=false {
+        toggle-overview;
+    }
 
     // ==================================================
     // Window Move
@@ -430,24 +437,34 @@ binds {
         consume-or-expel-window-right;
     }
 
+    // ==================================================
+    // Monitor Transition
+    // ==================================================
     Alt+Ctrl+H {
-        focus-window-up;
+        focus-monitor-left;
     }
 
     Alt+Ctrl+L {
-        focus-window-down;
+        focus-monitor-right;
     }
-
 
     // ==================================================
-    // Column Width
+    // Resize
     // ==================================================
 
-    Alt+Ctrl+Minus {
-        set-column-width "-10%";
+    Alt+Comma  { consume-window-into-column; }
+    Alt+Period { expel-window-from-column; }
+    Alt+R { switch-preset-column-width; }
+
+    // ==================================================
+    // clipboard & snippets
+    // ==================================================
+
+    Alt+V {
+        spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
 
-    Alt+Ctrl+Equal {
-        set-column-width "+10%";
+    Alt+apostrophe {
+        spawn "noctalia" "msg" "panel-toggle" "launcher" "/sh ";
     }
-}
+  }
