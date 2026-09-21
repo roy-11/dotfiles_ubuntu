@@ -30,7 +30,7 @@ chezmoi --version
 ### 3. Clone dotfiles
 
 ```bash
-chezmoi init git@github.com:USERNAME/dotfiles.git
+chezmoi init git@github.com:roy-11/dotfiles_ubuntu.git
 ```
 
 Review:

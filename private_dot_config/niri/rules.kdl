@@ -1,0 +1,37 @@
+// niri msg pick-window
+// niri msg windows
+
+window-rule {
+    match app-id=r#"^Alacritty$"#
+    open-on-workspace "terminal"
+}
+
+window-rule {
+    match app-id=r#"(?i)(firefox|chromium|brave|google-chrome|vivaldi)"#
+    open-on-workspace "browser"
+}
+
+window-rule {
+    match app-id=r#"(?i)slack"#
+    match app-id=r#"(?i)discord"#
+    open-on-workspace "chat"
+}
+
+window-rule {
+    match app-id=r#"(?i)obsidian"#
+    match app-id=r#"(?i)chatgpt"#
+    match app-id=r#"(?i)notion"#
+    open-on-workspace "note"
+}
+
+window-rule {
+    match app-id=r#"(?i)spotify"#
+    match app-id=r#"(?i)anki"#
+    match app-id=r#"(?i)ticktick"#
+    open-on-workspace "others"
+}
+
+// window-rule {
+//     match app-id=r#"(?i)blueman"#
+//     open-floating true
+// }

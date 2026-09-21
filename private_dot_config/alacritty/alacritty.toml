@@ -7,9 +7,23 @@ style = "Regular"
 
 [window]
 padding = { x = 8, y = 8 }
+opacity = 0.85
+decorations = "None"
 
 [cursor]
-style = { shape = "Block", blinking = "Off" }
+# "Block", "Underline"
+style = { shape = "Beam", blinking = "Off" }
 
 [selection]
 save_to_clipboard = true
+
+[keyboard]
+bindings = [
+  # { key = "C", mods = "Control|Shift", action = "Copy" },
+  # { key = "V", mods = "Control|Shift", action = "Paste" },
+  { key = "+", mods = "Control|Shift", action = "IncreaseFontSize" },
+  { key = "-", mods = "Control|Shift", action = "DecreaseFontSize" },
+]
+
+# [terminal]
+# osc52 = "CopyPaste"
