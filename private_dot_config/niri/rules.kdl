@@ -37,6 +37,11 @@ window-rule {
     draw-border-with-background false
 }
 
+window-rule {
+    match app-id=r#"(?i)^espanso$"#
+    open-floating true
+}
+
 // window-rule {
 //     match app-id=r#"(?i)blueman"#
 //     open-floating true

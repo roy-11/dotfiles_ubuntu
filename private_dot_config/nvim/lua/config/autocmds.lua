@@ -6,3 +6,13 @@
 --
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+
+-- ノーマルモードに戻るとき英数入力にする
+vim.api.nvim_create_autocmd("InsertLeave", {
+  desc = "ノーマルモードに戻るとき英数入力にする",
+  pattern = "*",
+  callback = function()
+    -- fcitx5で英数入力に切り替え
+    vim.fn.jobstart({ "fcitx5-remote", "-c" }, { detach = true })
+  end,
+})

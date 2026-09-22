@@ -317,13 +317,12 @@ binds {
         screenshot;
     }
 
-
     // ==================================================
     // Focus - AeroSpace風 H/J/K/L
     // ==================================================
 
     Alt+H {
-        focus-column-left;
+        focus-column-or-monitor-left;
     }
 
     Alt+J {
@@ -335,7 +334,7 @@ binds {
     }
 
     Alt+L {
-        focus-column-right;
+        focus-column-or-monitor-right;
     }
 
     Alt+semicolon repeat=false {
@@ -347,7 +346,7 @@ binds {
     // ==================================================
 
     Alt+Shift+H {
-        move-column-left;
+        move-column-left-or-to-monitor-left;
     }
 
     Alt+Shift+J {
@@ -359,7 +358,7 @@ binds {
     }
 
     Alt+Shift+L {
-        move-column-right;
+        move-column-right-or-to-monitor-right;
     }
 
 
@@ -464,7 +463,7 @@ binds {
         spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
 
-    Alt+apostrophe {
-        spawn "noctalia" "msg" "panel-toggle" "launcher" "/sh ";
+    Alt+apostrophe repeat=false {
+        spawn "espanso" "cmd" "search";
     }
   }

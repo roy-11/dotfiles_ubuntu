@@ -18,6 +18,35 @@ require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+
+    -- import any extras modules here
+    -- フォーマット・リンティング
+    { import = "lazyvim.plugins.extras.linting.eslint" }, -- 追加：eslint
+    { import = "lazyvim.plugins.extras.formatting.prettier" }, -- 追加：prettier
+    -- 言語
+    { import = "lazyvim.plugins.extras.lang.typescript" }, -- 追加：typescript
+    { import = "lazyvim.plugins.extras.lang.json" }, -- 追加：json
+    { import = "lazyvim.plugins.extras.lang.tailwind" }, -- 追加：tailwind
+    { import = "lazyvim.plugins.extras.lang.docker" }, -- 追加： dokcer
+    { import = "lazyvim.plugins.extras.lang.yaml" }, -- 追加：yaml
+    { import = "lazyvim.plugins.extras.lang.git" }, -- 追加：git
+    { import = "lazyvim.plugins.extras.lang.markdown" }, -- 追加：markdown
+    { import = "lazyvim.plugins.extras.lang.python" }, -- 追加：python
+    { import = "lazyvim.plugins.extras.lang.toml" }, -- 追加：toml
+    { import = "lazyvim.plugins.extras.lang.sql" }, -- 追加：sql
+    { import = "lazyvim.plugins.extras.lang.prisma" }, -- 追加：prisma
+    { import = "lazyvim.plugins.extras.util.dot" }, -- .env, .conf
+    -- Other Recommended
+    { import = "lazyvim.plugins.extras.editor.inc-rename" },
+    { import = "lazyvim.plugins.extras.editor.dial" },
+    { import = "lazyvim.plugins.extras.coding.yanky" },
+    { import = "lazyvim.plugins.extras.util.mini-hipatterns" },
+    -- Git
+    { import = "lazyvim.plugins.extras.util.gh" },
+    -- AI
+    { import = "lazyvim.plugins.extras.ai.copilot" }, -- goast suggest
+    { import = "lazyvim.plugins.extras.ai.claudecode" },
+
     -- import/override with your plugins
     { import = "plugins" },
   },

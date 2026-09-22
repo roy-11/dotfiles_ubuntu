@@ -28,7 +28,9 @@ sudo apt install -y \
   fcitx5 \
   fcitx5-mozc \
   fcitx5-config-qt \
-  keyd
+  keyd \
+  git-delta \
+  lazygit
 
 sudo update-locale LANG=ja_JP.UTF-8
 

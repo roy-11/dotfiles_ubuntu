@@ -23,6 +23,9 @@ input {
 
         // Enable numlock on startup, omitting this setting disables it.
         numlock
+
+        repeat-delay 180
+        repeat-rate 50
     }
 
     // Next sections include libinput settings.
@@ -313,6 +316,28 @@ animations {
 
     // Slow down all animations by this factor. Values below 1 speed them up instead.
     // slowdown 3.0
+   
+    // - ウィンドウ移動
+    // - ウィンドウリサイズ
+    // - 横スクロール
+    // - Workspace移動
+    // - ウィンドウ開閉
+    // を高速化
+    //
+    // 1.0 = 通常
+    // 0.8 = 少し速い
+    // 0.6 = かなり速い
+    // 0.5 = 約2倍速
+    // 0.35 = かなり瞬間的
+    slowdown 0.7
+
+    // 移動・リサイズだけアニメーションOF
+    // window-movement {
+    //     off
+    // }
+    // window-resize {
+    //     off
+    // }
 }
 
 // Window rules let you adjust behavior for individual windows.
