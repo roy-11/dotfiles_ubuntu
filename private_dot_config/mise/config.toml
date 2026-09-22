@@ -1,5 +1,11 @@
 [tools]
 atuin = "latest"
 chezmoi = "latest"
+yazi = "latest"
+lazydocker = "latest"
+uv = "latest"
 node = "lts"
-"npm:@anthropic-ai/claude-code" = "latest"
+"npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = [
+  "@anthropic-ai/claude-code",
+] }
+"pypi:sqlit-tui" = { version = "latest", extras = ["mysql"], depends = ["uv"] }

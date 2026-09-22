@@ -9,6 +9,9 @@ alias gd='git diff'
 alias gl='~/.scripts.sh gl'
 alias lg='lazygit'
 
+# jman
+alias jman='LANG=ja_JP.UTF-8 LC_ALL=ja_JP.UTF-8 man'
+
 # cd
 alias app='cd ~/App'
 alias desk='cd ~/Desktop'

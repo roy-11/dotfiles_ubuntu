@@ -30,7 +30,28 @@ sudo apt install -y \
   fcitx5-config-qt \
   keyd \
   git-delta \
-  lazygit
+  lazygit \
+  btop \
+  mpv \
+  manpages-ja \
+  manpages-ja-dev \
+  file \
+  ffmpeg \
+  7zip \
+  jq \
+  poppler-utils \
+  imagemagick \
+  resvg btop \
+  mpv \
+  manpages-ja \
+  manpages-ja-dev \
+  file \
+  ffmpeg \
+  7zip \
+  jq \
+  poppler-utils \
+  imagemagick \
+  resvg
 
 sudo update-locale LANG=ja_JP.UTF-8
 
