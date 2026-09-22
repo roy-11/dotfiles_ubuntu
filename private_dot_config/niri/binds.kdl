@@ -314,7 +314,8 @@ binds {
     }
 
     Alt+S repeat=false {
-        spawn "flameshot" "gui";
+        // spawn "flameshot" "gui";
+        spawn-sh "set -e; grim -t ppm -g \"$(slurp -o -d -F monospace)\" - | satty --filename -";
     }
 
     // ==================================================
