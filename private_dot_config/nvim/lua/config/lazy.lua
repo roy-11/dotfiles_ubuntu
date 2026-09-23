@@ -23,6 +23,8 @@ require("lazy").setup({
     -- フォーマット・リンティング
     { import = "lazyvim.plugins.extras.linting.eslint" }, -- 追加：eslint
     { import = "lazyvim.plugins.extras.formatting.prettier" }, -- 追加：prettier
+    { import = "lazyvim.plugins.extras.lang.typescript.biome" }, -- 追加：biome
+
     -- 言語
     { import = "lazyvim.plugins.extras.lang.typescript" }, -- 追加：typescript
     { import = "lazyvim.plugins.extras.lang.json" }, -- 追加：json

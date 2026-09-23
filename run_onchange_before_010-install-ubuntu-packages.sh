@@ -41,7 +41,8 @@ sudo apt install -y \
   jq \
   poppler-utils \
   imagemagick \
-  resvg btop \
+  btop \
+  fastfetch \
   mpv \
   manpages-ja \
   manpages-ja-dev \

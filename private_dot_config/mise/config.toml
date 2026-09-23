@@ -5,6 +5,9 @@ yazi = "latest"
 lazydocker = "latest"
 uv = "latest"
 node = "lts"
+deno = "latest"
+herdr = "latest"
+yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 "npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = [
   "@anthropic-ai/claude-code",
 ] }

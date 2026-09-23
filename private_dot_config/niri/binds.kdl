@@ -464,7 +464,7 @@ binds {
         spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
 
-    // Alt+apostrophe repeat=false {
-    //     spawn "espanso" "cmd" "search";
-    // }
+    Alt+apostrophe repeat=false {
+        spawn "espanso" "cmd" "search";
+    }
   }

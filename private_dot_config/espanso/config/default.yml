@@ -54,3 +54,5 @@
 keyboard_layout:
   layout: "us"
   model: "pc105"
+
+search_shortcut: off

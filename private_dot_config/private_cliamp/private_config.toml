@@ -1,0 +1,8 @@
+shuffle = true
+repeat = "Off"
+speed = 1.00
+theme = ""
+
+[ytmusic]
+enabled = true
+cookies_from = "chrome+gnomekeyring"
