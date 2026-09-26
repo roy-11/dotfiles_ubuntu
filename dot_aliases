@@ -23,6 +23,13 @@ alias vim='nvim'
 # tmux
 alias ta='tmux a'
 
+# herder
+alias hdr='herdr'
+
+# obsidian
+alias obgui='/usr/bin/obsidian >/dev/null 2>&1 & disown'
+alias ob='obsidian'
+
 # setup ide or project window 
 alias ide='~/.scripts.sh ide'
 

@@ -42,6 +42,8 @@ sudo apt install -y \
   poppler-utils \
   imagemagick \
   btop \
+  gh \
+  tealdeer \
   fastfetch \
   mpv \
   manpages-ja \
@@ -52,7 +54,9 @@ sudo apt install -y \
   jq \
   poppler-utils \
   imagemagick \
-  resvg
+  resvg \
+  bubblewrap \
+  socat
 
 sudo update-locale LANG=ja_JP.UTF-8
 

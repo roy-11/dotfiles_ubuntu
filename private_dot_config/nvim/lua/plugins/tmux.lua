@@ -2,6 +2,9 @@ return {
   {
     "alexghergh/nvim-tmux-navigation",
     event = "BufReadPre", -- https://github.com/LazyVim/LazyVim/issues/1502 ファイルを一度開く必要あり
+    cond = function()
+      return vim.env.HERDR_PANE_ID == nil
+    end,
     config = function()
       local nvim_tmux_nav = require("nvim-tmux-navigation")
 

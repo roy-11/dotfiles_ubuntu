@@ -1,0 +1,108 @@
+onboarding = false
+
+[theme]
+name = "terminal"
+auto_switch = false
+
+[ui]
+status_indicators = "dots"
+mouse_capture = true
+copy_on_select = true
+
+[keys]
+# ------------------------------
+# prefix
+# ------------------------------
+
+prefix = "ctrl+a"
+
+# ------------------------------
+# workspace = tmux session感覚
+# ------------------------------
+
+previous_workspace = "prefix+("
+next_workspace = "prefix+)"
+
+# ------------------------------
+# tab = tmux window感覚
+# ------------------------------
+
+new_tab = "prefix+c"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+switch_tab = "prefix+1..9"
+rename_tab = "prefix+comma"
+
+# ------------------------------
+# pane
+# ------------------------------
+
+# nvim-herdr-navigationにCtrl-hjklを渡す
+focus_pane_left = ""
+focus_pane_down = ""
+focus_pane_up = ""
+focus_pane_right = ""
+
+# paneの位置を入れ替える
+swap_pane_left = 'prefix+{'
+swap_pane_right = 'prefix+}'
+
+# tmuxと同じ
+# \ → 上下
+# | → 左右
+split_horizontal = 'prefix+\'
+split_vertical = 'prefix+|'
+
+close_pane = "prefix+x"
+zoom = "prefix+m"
+
+resize_mode = "prefix+r"
+copy_mode = "prefix+["
+
+detach = "prefix+d"
+reload_config = "prefix+shift+r"
+
+# ========================================
+# Agent
+# ========================================
+
+# 前 / 次 agent
+previous_agent = 'prefix+<'
+next_agent = 'prefix+>'
+
+# Agent 1〜9へ直接ジャンプ
+focus_agent = "prefix+alt+1..9"
+
+# ------------------------------
+# vim / neovim navigation
+# ------------------------------
+
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "local.vim-navigator.left"
+description = "Vim-aware pane left"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "local.vim-navigator.down"
+description = "Vim-aware pane down"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "local.vim-navigator.up"
+description = "Vim-aware pane up"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "local.vim-navigator.right"
+description = "Vim-aware pane right"
+
+[session]
+resume_agents_on_restore = true
+
+[advanced]
+scrollback_limit_bytes = 50000000
