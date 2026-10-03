@@ -8,7 +8,8 @@
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
 -- ノーマルモードに戻るとき英数入力にする
-if os.getenv("WAYLAND_DISPLAY") then
+-- fcitx5-remote は D-Bus 経由なので WAYLAND_DISPLAY が無い環境(herdr/SSH 経由など)でも動く
+if vim.fn.executable("fcitx5-remote") == 1 then
   vim.api.nvim_create_autocmd("InsertLeave", {
     desc = "ノーマルモードに戻るとき英数入力にする",
     callback = function()
