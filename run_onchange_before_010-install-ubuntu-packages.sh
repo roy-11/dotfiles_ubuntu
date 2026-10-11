@@ -4,7 +4,7 @@ set -euo pipefail
 
 sudo apt update
 
-# 'xterm-kitty': unknown terminal type 対策
+# 'xterm-kitty': unknown terminal type 対策 → kitty-terminfo
 sudo apt install -y \
   git \
   curl \
@@ -18,6 +18,7 @@ sudo apt install -y \
   ripgrep \
   fd-find \
   wl-clipboard \
+  kitty \
   kitty-terminfo \
   tree-sitter-cli \
   eza \
@@ -32,16 +33,6 @@ sudo apt install -y \
   git-delta \
   lazygit \
   btop \
-  mpv \
-  manpages-ja \
-  manpages-ja-dev \
-  file \
-  ffmpeg \
-  7zip \
-  jq \
-  poppler-utils \
-  imagemagick \
-  btop \
   gh \
   tealdeer \
   fastfetch \
@@ -55,6 +46,7 @@ sudo apt install -y \
   poppler-utils \
   imagemagick \
   resvg \
+  chafa \
   bubblewrap \
   socat
 

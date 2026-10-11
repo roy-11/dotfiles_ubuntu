@@ -6,6 +6,7 @@ lazydocker = "latest"
 uv = "latest"
 node = "lts"
 deno = "latest"
+bun = "latest"
 herdr = "latest"
 yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 "npm:@anthropic-ai/claude-code" = { version = "latest", allow_builds = [
@@ -13,3 +14,7 @@ yt-dlp = { version = "latest", rename_exe = "yt-dlp" }
 ] }
 "pypi:sqlit-tui" = { version = "latest", extras = ["mysql"], depends = ["uv"] }
 python = "3.14"
+rust = "latest"
+"github:anomalyco/opencode" = "latest"
+"github:agavra/tuicr" = "latest"
+"github:furkankly/zoetrope" = "latest"

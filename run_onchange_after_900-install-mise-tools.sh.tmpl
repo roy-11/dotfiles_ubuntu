@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# mise の設定が変わったら再実行する
+# config.toml hash: {{ include "private_dot_config/mise/config.toml" | sha256sum }}
+
+# 初回 bootstrap 時はシェル設定がまだ読み込まれていないため明示的に通す
+export PATH="$HOME/.local/bin:$PATH"
+
+command -v mise >/dev/null 2>&1 || {
+  echo "mise is not installed"
+  exit 1
+}
+
+mise install
