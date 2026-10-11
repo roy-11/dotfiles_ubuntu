@@ -1,0 +1,11 @@
+[Unit]
+Description=RSS relay for wtf feedreader: daily.dev / GitHub (localhost:8737)
+After=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/wtf-feed-server
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

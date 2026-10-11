@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# wtf の cmdrunner から呼ぶセキュリティ / メンテナンス状況の表示用スクリプト (root 不要)
+# cmdrunner は tview タグを解釈しないので色は ANSI エスケープで付ける
+set -uo pipefail
+
+red=$'\033[31m' green=$'\033[32m' yellow=$'\033[33m' gray=$'\033[90m' reset=$'\033[0m'
+row() { printf '%-9s %s\n' "$1" "$2"; }
+
+# 更新: パッケージリストは apt update 時点のもの
+mapfile -t upgradable < <(apt list --upgradable 2>/dev/null | tail -n +2)
+security="$(printf '%s\n' "${upgradable[@]}" | grep -c -- '-security')"
+if [ "${#upgradable[@]}" -eq 0 ]; then
+  row "updates" "${green}最新${reset}"
+elif [ "$security" -gt 0 ]; then
+  row "updates" "${red}security ${security}${reset} ${gray}/ 全 ${#upgradable[@]} 件${reset}"
+else
+  row "updates" "${yellow}${#upgradable[@]} 件${reset} ${gray}(security なし)${reset}"
+fi
+# 再起動が必要か (カーネル更新など)
+if [ -f /var/run/reboot-required ]; then
+  row "reboot" "${red}必要${reset} ${gray}$(tr '\n' ' ' </var/run/reboot-required.pkgs 2>/dev/null)${reset}"
+else
+  row "reboot" "${green}不要${reset}"
+fi
+
+# ファイアウォール: ufw status は root が要るので設定ファイルを見る
+if [ ! -r /etc/ufw/ufw.conf ]; then
+  row "firewall" "${gray}ufw なし${reset}"
+elif grep -qi '^ENABLED=yes' /etc/ufw/ufw.conf; then
+  row "firewall" "${green}ufw 有効${reset}"
+else
+  row "firewall" "${yellow}ufw 無効${reset}"
+fi
+
+# SSH: sshd の状態とログイン中のセッション数
+# Ubuntu 24.04 以降は ssh.socket で待ち受け、接続時に ssh.service が起動する
+sshd_service="$(systemctl is-active ssh.service 2>/dev/null)"
+sshd_socket="$(systemctl is-active ssh.socket 2>/dev/null)"
+sessions="$(who | grep -c '(')"
+if [ "$sshd_service" = "active" ] || [ "$sshd_socket" = "active" ]; then
+  row "sshd" "${yellow}待ち受け中${reset} ${gray}(ssh セッション ${sessions})${reset}"
+elif [ -z "$sshd_service$sshd_socket" ]; then
+  row "sshd" "${gray}不明${reset}"
+else
+  row "sshd" "${green}停止${reset}"
+fi
+
+# localhost 以外で待ち受けているポート
+mapfile -t ports < <(ss -Htuln 2>/dev/null | awk '{print $1, $5}' |
+  grep -vE ' (127\.|\[::1\]|\[::ffff:127\.)' | sed -E 's/^(tcp|udp) .*:([0-9]+)$/\1:\2/' | sort -u -t: -k2n)
+if [ "${#ports[@]}" -eq 0 ]; then
+  row "listen" "${green}なし${reset}"
+else
+  row "listen" "${yellow}${#ports[@]} 件${reset} ${gray}${ports[*]:0:8}${reset}"
+fi
+
+# Tailscale: 接続状態とオンラインのピア数
+if ! command -v tailscale >/dev/null 2>&1; then
+  row "tailscale" "${gray}未インストール${reset}"
+elif ! ts="$(tailscale status --json 2>/dev/null)"; then
+  row "tailscale" "${red}tailscaled 停止中${reset}"
+elif [ "$(jq -r '.BackendState' <<<"$ts")" = "Running" ]; then
+  online="$(jq '[.Peer // {} | .[] | select(.Online)] | length' <<<"$ts")"
+  total="$(jq '.Peer // {} | length' <<<"$ts")"
+  row "tailscale" "${green}接続中${reset} $(jq -r '.Self.TailscaleIPs[0] // "-"' <<<"$ts") ${gray}(peer ${online}/${total})${reset}"
+else
+  row "tailscale" "${yellow}$(jq -r '.BackendState' <<<"$ts")${reset}"
+fi

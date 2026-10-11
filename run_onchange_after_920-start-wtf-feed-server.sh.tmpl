@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# wtf の feedreader 用 RSS 中継 (~/.local/bin/wtf-feed-server) を常駐させる
+# スクリプトか unit が変わったら再起動する
+# wtf-feed-server: {{ include "private_dot_local/bin/executable_wtf-feed-server" | sha256sum }}
+# unit: {{ include "private_dot_config/systemd/user/wtf-feed-server.service" | sha256sum }}
+
+# 旧名のサービス (wtf-dailydev-feed) が残っていれば止める。ファイルは .chezmoiremove で消す
+systemctl --user disable --now wtf-dailydev-feed.service 2>/dev/null || true
+
+systemctl --user daemon-reload
+systemctl --user enable wtf-feed-server.service
+systemctl --user restart wtf-feed-server.service

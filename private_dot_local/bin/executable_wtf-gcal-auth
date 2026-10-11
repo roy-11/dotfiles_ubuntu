@@ -1,0 +1,130 @@
+#!/usr/bin/python3
+"""wtf の gcal モジュール用に Google Calendar の OAuth トークンを取得する (初回だけ実行)。
+
+wtf の gcal は認可コードをダッシュボードの裏で標準入力から読むため、まともに入力できない。
+代わりにこのスクリプトで localhost のリダイレクトを受けてトークンを取り、
+wtf が読む ~/.config/wtf/<email>-gcal-auth.json (Go の oauth2.Token 形式) に保存する。
+
+  wtf-gcal-auth [email]   email を省略すると ~/.config/wtf/config.yml の gcal.email を使う
+"""
+
+import base64
+import hashlib
+import json
+import re
+import secrets
+import sys
+import urllib.parse
+import urllib.request
+import webbrowser
+from datetime import datetime, timedelta, timezone
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+
+WTF_DIR = Path("~/.config/wtf").expanduser()
+CLIENT_FILE = WTF_DIR / "gcal" / "client_secret.json"
+SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
+
+
+def config_email():
+    text = (WTF_DIR / "config.yml").read_text()
+    block = text[text.index("gcal:") :]
+    return re.search(r'email:\s*"?([^"\s]+)"?', block)[1]
+
+
+def main():
+    email = sys.argv[1] if len(sys.argv) > 1 else config_email()
+    client = json.loads(CLIENT_FILE.read_text())
+    client = client.get("installed") or client.get("web")
+
+    # PKCE と state で、受け取ったコードがこの実行のものか確かめる
+    verifier = secrets.token_urlsafe(64)
+    challenge = (
+        base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest())
+        .rstrip(b"=")
+        .decode()
+    )
+    state = secrets.token_urlsafe(16)
+    result = {}
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            query = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            if query.get("state", [""])[0] != state:
+                self.send_error(400, "state mismatch")
+                return
+            result.update({k: v[0] for k, v in query.items()})
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(
+                "認可を受け取りました。このタブは閉じて構いません。".encode()
+            )
+
+        def log_message(self, *args):
+            pass
+
+    # デスクトップアプリの OAuth クライアントはループバックの任意ポートを許可している
+    server = HTTPServer(("127.0.0.1", 0), Handler)
+    redirect_uri = f"http://127.0.0.1:{server.server_port}/"
+    auth_url = (
+        client["auth_uri"]
+        + "?"
+        + urllib.parse.urlencode(
+            {
+                "client_id": client["client_id"],
+                "redirect_uri": redirect_uri,
+                "response_type": "code",
+                "scope": SCOPE,
+                "access_type": "offline",
+                "prompt": "consent",  # refresh_token を確実にもらう
+                "login_hint": email,
+                "state": state,
+                "code_challenge": challenge,
+                "code_challenge_method": "S256",
+            }
+        )
+    )
+
+    print(f"ブラウザで認可してください ({email}):\n{auth_url}\n")
+    webbrowser.open(auth_url)
+    while "code" not in result and "error" not in result:
+        server.handle_request()
+    server.server_close()
+    if "error" in result:
+        sys.exit(f"認可に失敗しました: {result['error']}")
+
+    data = urllib.parse.urlencode(
+        {
+            "code": result["code"],
+            "client_id": client["client_id"],
+            "client_secret": client["client_secret"],
+            "redirect_uri": redirect_uri,
+            "grant_type": "authorization_code",
+            "code_verifier": verifier,
+        }
+    ).encode()
+    with urllib.request.urlopen(client["token_uri"], data=data, timeout=30) as res:
+        tok = json.load(res)
+    if "refresh_token" not in tok:
+        sys.exit("refresh_token が返りませんでした。もう一度実行してください")
+
+    expiry = datetime.now(timezone.utc) + timedelta(seconds=tok.get("expires_in", 3600))
+    out = WTF_DIR / f"{email}-gcal-auth.json"
+    out.touch(mode=0o600, exist_ok=True)
+    out.write_text(
+        json.dumps(
+            {
+                "access_token": tok["access_token"],
+                "token_type": tok.get("token_type", "Bearer"),
+                "refresh_token": tok["refresh_token"],
+                "expiry": expiry.isoformat().replace("+00:00", "Z"),
+            }
+        )
+    )
+    out.chmod(0o600)
+    print(f"保存しました: {out}")
+
+
+if __name__ == "__main__":
+    main()

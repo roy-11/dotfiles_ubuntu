@@ -1,0 +1,240 @@
+wtf:
+  colors:
+    border:
+      focusable: darkslateblue
+      focused: orange
+      normal: gray
+  grid:
+    # 0 は空き幅を均等に分ける (画面いっぱいに広がる)
+    columns: [0, 0, 0, 0, 0]
+    rows: [10, 0, 0, 0, 0, 12, 12, 12, 9]
+  refreshInterval: 1
+  mods:
+    # ---------- 1段目: 時計 / 天気 / システム / セキュリティ ----------
+    clocks:
+      type: clocks
+      title: "Clocks"
+      enabled: true
+      locations:
+        Tokyo: "Asia/Tokyo"
+        UTC: "Etc/UTC"
+      sort: "chronological"
+      colors:
+        rows:
+          even: "lightblue"
+          odd: "white"
+      position:
+        top: 0
+        left: 1
+        height: 1
+        width: 1
+      refreshInterval: 15s
+    prettyweather:
+      enabled: true
+      title: "Weather"
+      city: "Tokyo"
+      language: "ja"
+      unit: "m"
+      view: 0
+      position:
+        top: 0
+        left: 2
+        height: 1
+        width: 1
+      refreshInterval: 30m
+    # リアルタイムの負荷は btop で見るので、ここは概要だけ
+    system_info:
+      type: cmdrunner
+      title: "System"
+      enabled: true
+      cmd: "fastfetch"
+      args: ["--logo", "none", "--pipe", "true", "--structure", "OS:Kernel:Uptime:CPU:GPU:Memory:Disk:LocalIP"]
+      position:
+        top: 0
+        left: 3
+        height: 1
+        width: 1
+      refreshInterval: 1m
+    # 更新 / 再起動 / ufw / sshd / 外部待ち受けポート / Tailscale (~/.local/bin/wtf-security)
+    security_status:
+      type: cmdrunner
+      title: "Security"
+      enabled: true
+      cmd: "wtf-security"
+      position:
+        top: 0
+        left: 4
+        height: 1
+        width: 1
+      refreshInterval: 5m
+
+    # ---------- 左端 1 列目: カレンダー (全段) ----------
+    # secretFile は Google Cloud Console で作った OAuth クライアント (デスクトップ) の JSON
+    # chezmoi では管理しない。初回起動時に表示される URL から認可する
+    # secretFile が無いと wtf ごと落ちるので、置いてある時だけ有効にする (置いたら chezmoi apply し直す)
+    gcal:
+      enabled: {{ if stat (joinPath .chezmoi.homeDir ".config/wtf/gcal/client_secret.json") }}true{{ else }}false{{ end }}
+      title: "Calendar"
+      focusChar: 1
+      secretFile: "~/.config/wtf/gcal/client_secret.json"
+      email: {{ .gcalEmail | quote }}
+      timezone: "Asia/Tokyo"
+      hourFormat: "24"
+      eventCount: 20
+      multiCalendar: true
+      calendarReadLevel: "reader"
+      showDeclined: false
+      showEndTime: true
+      withLocation: false
+      displayResponseStatus: true
+      currentIcon: "▶"
+      conflictIcon: "⚠"
+      colors:
+        title: "white"
+        eventTime: "lightblue"
+        description: "yellow"
+        past: "gray"
+      position:
+        top: 0
+        left: 0
+        height: 9
+        width: 1
+      refreshInterval: 5m
+
+    # ---------- 2-5段目: 通知 (2x4) / My PRs (2x2) / レビュー依頼 (2x2) ----------
+    # GitHub は wtf の github モジュールだと repo 単位でしか検索できないので
+    # gh CLI の結果を RSS にする localhost の中継 (~/.local/bin/wtf-feed-server) から読む
+    gh_mine:
+      type: feedreader
+      title: "My PRs (CI / Review)"
+      enabled: true
+      focusChar: 2
+      feeds:
+        - "http://127.0.0.1:8737/gh/mine.rss"
+      showSource: false
+      position:
+        top: 1
+        left: 3
+        height: 2
+        width: 2
+      refreshInterval: 1m
+    gh_notifications:
+      type: feedreader
+      title: "GitHub Notifications"
+      enabled: true
+      focusChar: 3
+      feeds:
+        - "http://127.0.0.1:8737/gh/notifications.rss"
+      showSource: false
+      position:
+        top: 1
+        left: 1
+        height: 4
+        width: 2
+      refreshInterval: 1m
+    gh_review:
+      type: feedreader
+      title: "PR: Review Requested"
+      enabled: true
+      focusChar: 4
+      feeds:
+        - "http://127.0.0.1:8737/gh/review.rss"
+      showSource: false
+      position:
+        top: 3
+        left: 3
+        height: 2
+        width: 2
+      refreshInterval: 1m
+
+    # ---------- 6-8段目: 記事 (1 段ずつ横幅いっぱい、Enter / o で開く) ----------
+    # daily.dev は API を RSS に変換する localhost の中継 (~/.local/bin/wtf-feed-server) から読む
+    dailydev:
+      type: feedreader
+      title: "daily.dev (For You)"
+      enabled: true
+      focusChar: 5
+      feeds:
+        - "http://127.0.0.1:8737/dailydev.rss"
+      showSource: false
+      position:
+        top: 5
+        left: 1
+        height: 1
+        width: 4
+      refreshInterval: 10m
+    tech_feeds:
+      type: feedreader
+      title: "Zenn / TechFeed"
+      enabled: true
+      focusChar: 6
+      feeds:
+        - "https://zenn.dev/feed"
+        - "https://techfeed.io/feeds/categories/all"
+      feedLimit: 15
+      position:
+        top: 6
+        left: 1
+        height: 1
+        width: 4
+      refreshInterval: 1h
+    news_feeds:
+      type: feedreader
+      title: "Google News"
+      enabled: true
+      focusChar: 7
+      feeds:
+        - "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"
+        - "https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=ja&gl=JP&ceid=JP:ja"
+      feedLimit: 15
+      position:
+        top: 7
+        left: 1
+        height: 1
+        width: 4
+      refreshInterval: 30m
+
+    # ---------- 9段目: git / systemd / docker ----------
+    git:
+      enabled: true
+      title: "Git"
+      focusChar: 8
+      commitCount: 3
+      commitFormat: "[forestgreen]%h [grey]%cd [white]%s"
+      dateFormat: "%m/%d %H:%M"
+      branchInTitle: true
+      lastFolderTitle: true
+      showModuleName: false
+      repositories:
+        - "/home/roy-11/.local/share/chezmoi"
+        - "/home/roy-11/obsidian_git"
+      position:
+        top: 8
+        left: 1
+        height: 1
+        width: 1
+      refreshInterval: 30s
+    systemd_failed:
+      type: cmdrunner
+      title: "systemctl --failed"
+      enabled: true
+      cmd: "systemctl"
+      args: ["--failed"]
+      position:
+        top: 8
+        left: 2
+        height: 1
+        width: 1
+      refreshInterval: 1m
+    docker_ps:
+      type: cmdrunner
+      title: "docker ps"
+      enabled: true
+      cmd: "docker"
+      args: ["ps", "--format", "table {{ "{{.Names}}" }}\t{{ "{{.Status}}" }}"]
+      position:
+        top: 8
+        left: 3
+        height: 1
+        width: 2
+      refreshInterval: 30s

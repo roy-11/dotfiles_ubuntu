@@ -1,0 +1,289 @@
+#!/usr/bin/python3
+"""wtf の feedreader 向けに、RSS の無い情報を RSS に変換して localhost で配信する。
+
+wtf の feedreader は http の RSS しか読めないが、項目を Enter で開ける・既読が付くので
+daily.dev や GitHub もこの中継を通して feedreader で表示する。
+systemd --user の wtf-feed-server.service から起動する。
+
+  /dailydev.rss          daily.dev「For You」(Plus の Public API)
+  /gh/review.rss         自分にレビュー依頼が来ている PR
+  /gh/mine.rss           自分の PR と CI / レビュー状態
+  /gh/notifications.rss  未読の GitHub 通知
+
+daily.dev のトークンは ~/.config/wtf/dailydev.token (chmod 600) に置く。chezmoi では管理しない
+GitHub は gh CLI の認証をそのまま使う。WTF_GH_ORG を指定するとその org に絞る
+"""
+
+import html
+import json
+import os
+import re
+import subprocess
+import threading
+import time
+import urllib.request
+from email.utils import format_datetime, formatdate
+from datetime import datetime
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from xml.sax.saxutils import escape
+
+HOST = "127.0.0.1"
+PORT = int(os.environ.get("WTF_FEED_PORT", "8737"))
+GH_ORG = os.environ.get("WTF_GH_ORG", "")
+DAILYDEV_LIMIT = int(os.environ.get("WTF_DAILYDEV_LIMIT", "30"))
+DAILYDEV_TOKEN_FILE = Path(
+    os.environ.get("WTF_DAILYDEV_TOKEN_FILE", "~/.config/wtf/dailydev.token")
+).expanduser()
+DAILYDEV_API = "https://api.daily.dev/public/v1/feeds/foryou"
+
+# 1 件 = (タイトル, リンク, 日時 or None)。日時があると feedreader が新しい順に並べる
+Item = tuple[str, str, str | None]
+
+
+class FeedError(Exception):
+    pass
+
+
+# feedreader はタイトルを tview の色タグとして解釈するので、[mention] や [WIP] が消えないよう
+# tview.Escape と同じ規則でエスケープする
+TVIEW_TAG = re.compile(r'(\[[a-zA-Z0-9_,;: \-\."#]+\[*)\]')
+
+
+def rss(title, link, items):
+    entries = []
+    for t, href, date in items:
+        t = TVIEW_TAG.sub(r"\1[]", t)
+        pub = ""
+        if date:
+            pub = f"<pubDate>{format_datetime(datetime.fromisoformat(date.replace('Z', '+00:00')))}</pubDate>"
+        entries.append(
+            f"<item><title>{escape(t)}</title><link>{escape(href)}</link>"
+            f"<guid>{escape(href)}</guid>{pub}</item>"
+        )
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>'
+        f"<title>{escape(title)}</title><link>{escape(link)}</link>"
+        f"<lastBuildDate>{formatdate()}</lastBuildDate>{''.join(entries)}</channel></rss>"
+    ).encode()
+
+
+def unescape(text):
+    # 二重エスケープ (&amp;amp;) もあるので変化しなくなるまで繰り返す
+    while (decoded := html.unescape(text)) != text:
+        text = decoded
+    return " ".join(text.split())
+
+
+# ---------- daily.dev ----------
+
+
+def dailydev() -> list[Item]:
+    token = (
+        DAILYDEV_TOKEN_FILE.read_text().strip() if DAILYDEV_TOKEN_FILE.is_file() else ""
+    )
+    if not token:
+        raise FeedError(f"トークンがありません ({DAILYDEV_TOKEN_FILE})")
+
+    req = urllib.request.Request(
+        f"{DAILYDEV_API}?limit={DAILYDEV_LIMIT}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    with urllib.request.urlopen(req, timeout=15) as res:
+        posts = json.load(res).get("data", [])
+
+    items = []
+    for p in posts:
+        # タイトルが空の投稿 (シェア等) は summary で代用し、どちらも無ければ出さない
+        text = unescape(p.get("title") or p.get("summary") or "")
+        link = p.get("url") or p.get("commentsPermalink")
+        if not text or not link:
+            continue
+        source = (p.get("source") or {}).get("name") or ""
+        # 日時は付けない (For You のおすすめ順を保つ)
+        items.append(
+            (
+                f"▲{p.get('numUpvotes') or 0} {text}"
+                + (f" ({source})" if source else ""),
+                link,
+                None,
+            )
+        )
+    return items
+
+
+# ---------- GitHub (gh CLI) ----------
+
+
+def gh(*args):
+    res = subprocess.run(["gh", *args], capture_output=True, text=True, timeout=30)
+    if res.returncode != 0:
+        raise FeedError((res.stderr or res.stdout).strip().splitlines()[0])
+    return json.loads(res.stdout or "null")
+
+
+def gh_review() -> list[Item]:
+    owner = ["--owner", GH_ORG] if GH_ORG else []
+    prs = gh(
+        "search",
+        "prs",
+        *owner,
+        "--review-requested=@me",
+        "--state=open",
+        "--sort=updated",
+        "--limit",
+        "30",
+        "--json",
+        "repository,number,title,author,url,updatedAt",
+    )
+    return [
+        (
+            f"{p['repository']['nameWithOwner']}#{p['number']} {p['title']} (@{p['author']['login']})",
+            p["url"],
+            p["updatedAt"],
+        )
+        for p in prs
+    ]
+
+
+CI_ICON = {
+    "SUCCESS": "✓",
+    "FAILURE": "✗",
+    "ERROR": "✗",
+    "PENDING": "●",
+    "EXPECTED": "●",
+}
+REVIEW_ICON = {"APPROVED": "✓", "CHANGES_REQUESTED": "✗", "REVIEW_REQUIRED": "●"}
+
+
+def gh_mine() -> list[Item]:
+    q = f"{'org:' + GH_ORG + ' ' if GH_ORG else ''}is:pr is:open author:@me sort:updated-desc"
+    data = gh(
+        "api",
+        "graphql",
+        "-f",
+        f"q={q}",
+        "-f",
+        """query=
+      query($q: String!) {
+        search(query: $q, type: ISSUE, first: 30) {
+          nodes {
+            ... on PullRequest {
+              number title url updatedAt isDraft reviewDecision
+              repository { nameWithOwner }
+              commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
+            }
+          }
+        }
+      }""",
+    )
+    items = []
+    for p in data["data"]["search"]["nodes"]:
+        commits = p["commits"]["nodes"]
+        ci = (
+            (commits[0]["commit"]["statusCheckRollup"] or {}).get("state")
+            if commits
+            else None
+        )
+        prefix = (
+            f"CI{CI_ICON.get(ci, '-')} RV{REVIEW_ICON.get(p['reviewDecision'], '-')} "
+        )
+        if p["isDraft"]:
+            prefix += "draft "
+        items.append(
+            (
+                f"{prefix}{p['repository']['nameWithOwner']}#{p['number']} {p['title']}",
+                p["url"],
+                p["updatedAt"],
+            )
+        )
+    return items
+
+
+def html_url(subject, repo_url):
+    # 通知の subject.url は API の URL なので Web の URL に直す
+    api = subject.get("url") or ""
+    m = re.match(
+        r"https://api\.github\.com/repos/([^/]+/[^/]+)/(pulls|issues|commits)/(\w+)",
+        api,
+    )
+    if m:
+        kind = {"pulls": "pull", "issues": "issues", "commits": "commit"}[m[2]]
+        return f"https://github.com/{m[1]}/{kind}/{m[3]}"
+    if subject.get("type") == "Release":
+        return f"{repo_url}/releases"
+    if subject.get("type") in ("CheckSuite", "WorkflowRun"):
+        return f"{repo_url}/actions"
+    return repo_url
+
+
+def gh_notifications() -> list[Item]:
+    notes = gh("api", "notifications")
+    return [
+        (
+            f"{n['repository']['full_name']} [{n['reason']}] {n['subject']['title']}",
+            html_url(n["subject"], n["repository"]["html_url"]),
+            n["updated_at"],
+        )
+        for n in notes[:30]
+    ]
+
+
+# パス -> (フィード名, Web のリンク, 取得関数, キャッシュ秒)
+FEEDS = {
+    "/dailydev.rss": ("daily.dev", "https://app.daily.dev", dailydev, 10 * 60),
+    "/gh/review.rss": (
+        "Review Requested",
+        "https://github.com/pulls/review-requested",
+        gh_review,
+        60,
+    ),
+    "/gh/mine.rss": ("My PRs", "https://github.com/pulls", gh_mine, 60),
+    "/gh/notifications.rss": (
+        "Notifications",
+        "https://github.com/notifications",
+        gh_notifications,
+        60,
+    ),
+}
+_cache: dict[str, tuple[float, bytes]] = {}
+_lock = threading.Lock()
+
+
+def render(path):
+    title, link, fetch, ttl = FEEDS[path]
+    with _lock:
+        at, body = _cache.get(path, (0.0, b""))
+        if time.time() - at > ttl:
+            try:
+                items = fetch() or [("(なし)", link, None)]
+            except Exception as e:  # noqa: BLE001 - エラーは 1 件の項目として表示する
+                items = [(f"error: {e}", link, None)]
+            body = rss(title, link, items)
+            _cache[path] = (time.time(), body)
+        return body
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # DNS リバインディング対策: ブラウザ経由で別ドメインから読まれないよう Host を確かめる
+        if self.headers.get("Host") not in (f"127.0.0.1:{PORT}", f"localhost:{PORT}"):
+            self.send_error(403)
+            return
+        path = self.path.split("?")[0]
+        if path not in FEEDS:
+            self.send_error(404)
+            return
+        body = render(path)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/rss+xml; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+
+if __name__ == "__main__":
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
