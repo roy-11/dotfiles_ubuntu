@@ -460,11 +460,26 @@ binds {
     // clipboard & snippets
     // ==================================================
 
-    Alt+V {
+    // Ctrl 2回押し (keyd で F13 = XF86Tools に変換)
+    XF86Tools repeat=false {
         spawn "noctalia" "msg" "panel-toggle" "clipboard";
+    }
+
+    // Alt 2回押し (keyd で F14 = XF86Launch5 に変換)
+    XF86Launch5 repeat=false {
+        spawn "espanso" "cmd" "search";
     }
 
     Alt+apostrophe repeat=false {
         spawn "espanso" "cmd" "search";
+    }
+
+    // ==================================================
+    // voice input (voxtype)
+    // ==================================================
+
+    // 1回目で録音開始、2回目で停止して文字起こし
+    Alt+V repeat=false {
+        spawn "voxtype" "record" "toggle";
     }
   }
