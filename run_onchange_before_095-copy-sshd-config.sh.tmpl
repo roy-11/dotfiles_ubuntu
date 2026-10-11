@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DEST=/etc/ssh/sshd_config.d/00-local.conf
+# 旧ファイル名（00- にして最優先で読ませるよう改名した）
+OLD=/etc/ssh/sshd_config.d/99-local.conf
+BACKUP="$(mktemp)"
+trap 'rm -f "$BACKUP"' EXIT
+
+if [[ -f "$DEST" ]]; then
+  # 一時ファイルの所有者を自分のままにするため cp -a は使わない
+  sudo cat "$DEST" >"$BACKUP"
+fi
+
+sudo tee "$DEST" >/dev/null <<'SSHD_CONFIG'
+{{ includeTemplate "ssh/sshd_config.d/00-local.conf.tmpl" . }}
+SSHD_CONFIG
+sudo chmod 644 "$DEST"
+
+# 構文エラーなら元に戻して中断（リモートから締め出されるのを防ぐ）
+if ! sudo sshd -t; then
+  echo "sshd config test failed. Restoring previous config." >&2
+  if [[ -s "$BACKUP" ]]; then
+    sudo install -m 644 "$BACKUP" "$DEST"
+  else
+    sudo rm -f "$DEST"
+  fi
+  exit 1
+fi
+
+sudo rm -f "$OLD"
+
+# Ubuntu 22.10+ のソケットアクティベーションでは Port 変更に daemon-reload が必要
+if systemctl is-enabled --quiet ssh.socket 2>/dev/null; then
+  sudo systemctl daemon-reload
+  sudo systemctl restart ssh.socket
+else
+  sudo systemctl reload ssh
+fi

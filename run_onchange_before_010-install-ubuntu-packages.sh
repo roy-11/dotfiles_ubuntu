@@ -33,7 +33,6 @@ sudo apt install -y \
   git-delta \
   lazygit \
   btop \
-  gh \
   tealdeer \
   fastfetch \
   mpv \

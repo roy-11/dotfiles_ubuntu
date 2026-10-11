@@ -1,0 +1,13 @@
+# ポート番号は chezmoi の config data (sshPort) から差し込む
+Port {{ .sshPort }}
+
+# 公開鍵認証
+PubkeyAuthentication yes
+# パスワード認証禁止
+PasswordAuthentication no
+# キーボードインタラクティブ認証も禁止
+KbdInteractiveAuthentication no
+# root ログイン禁止
+PermitRootLogin no
+# 1接続あたりの認証試行回数
+MaxAuthTries 3
