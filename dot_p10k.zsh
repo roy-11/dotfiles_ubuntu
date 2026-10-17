@@ -52,7 +52,11 @@
     # context                 # user@host
     dir                       # current directory
     vcs                       # git status
-    # command_execution_time  # previous command duration
+    # 右プロンプトを1行目に置くと行末まで空白で埋まり、herdr の zoom 解除 (幅縮小) 時の
+    # リフローでプロンプトが崩れるため、左側に寄せる
+    command_execution_time    # previous command duration
+    virtualenv                # python virtual environment
+    context                   # user@host
     # =========================[ Line #2 ]=========================
     newline                   # \n
     # virtualenv              # python virtual environment
@@ -61,13 +65,7 @@
 
   # Right prompt segments.
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
-    # =========================[ Line #1 ]=========================
-    command_execution_time    # previous command duration
-    virtualenv                # python virtual environment
-    context                   # user@host
-    # time                    # current time
-    # =========================[ Line #2 ]=========================
-    newline                   # \n
+    # 空にしておく (左プロンプト側のコメント参照)
   )
 
   # Basic style options that define the overall prompt look.

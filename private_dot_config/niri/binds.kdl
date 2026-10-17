@@ -293,6 +293,10 @@ binds {
         spawn "alacritty";
     }
 
+    Alt+A repeat=false {
+        spawn "alacritty";
+    }
+
     Alt+Q repeat=false {
         close-window;
     }
@@ -327,11 +331,11 @@ binds {
     }
 
     Alt+J {
-        focus-window-down;
+        focus-window-or-workspace-down;
     }
 
     Alt+K {
-        focus-window-up;
+        focus-window-or-workspace-up;
     }
 
     Alt+L {
@@ -351,11 +355,11 @@ binds {
     }
 
     Alt+Shift+J {
-        move-window-down;
+        move-window-down-or-to-workspace-down;
     }
 
     Alt+Shift+K {
-        move-window-up;
+        move-window-up-or-to-workspace-up;
     }
 
     Alt+Shift+L {
@@ -468,6 +472,11 @@ binds {
     // Alt 2回押し (keyd で F14 = XF86Launch5 に変換)
     XF86Launch5 repeat=false {
         spawn "espanso" "cmd" "search";
+    }
+
+    // Esc (keyd で Esc の後に F15 = XF86Launch6 を送る) → IME を US に戻す
+    XF86Launch6 allow-when-locked=true {
+        spawn "fcitx5-remote" "-c";
     }
 
     Alt+apostrophe repeat=false {

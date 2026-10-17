@@ -178,6 +178,9 @@ type_delay_ms = 0
 # consistent fix is to use F12 or another key instead.
 pre_type_delay_ms = 0
 
+# GUI アプリで先頭の日本語1文字が落ちる対策 (入力前に Shift を押して離す)
+wtype_shift_prefix = true
+
 # Keystroke for paste mode (when mode = "paste")
 # Default is "ctrl+v". Change for environments with different paste shortcuts.
 # Examples:
@@ -185,6 +188,8 @@ pre_type_delay_ms = 0
 #   paste_keys = "shift+insert"  # Hyprland/Omarchy universal paste
 #   paste_keys = "ctrl+shift+v"  # Some terminal emulators
 # paste_keys = "ctrl+v"
+# mode = "paste" にする場合: Shift+Insert はターミナルで PRIMARY 選択の貼り付けになるため Ctrl+Shift+V
+# paste_keys = "ctrl+shift+v"
 
 # Compositor integration hooks
 # Use `voxtype setup compositor hyprland|sway|river` for automatic setup.
