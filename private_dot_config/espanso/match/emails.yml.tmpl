@@ -1,7 +1,10 @@
 # (base.yml は espanso の {{ "{{output}}" }} 記法を使うので、テンプレートにするのはこのファイルだけ)
 matches:
-  - trigger: ":mg"
+  - trigger: ":mgp"
     replace: {{ .espansoWorkEmail | quote }}
+
+  - trigger: ":mgd"
+    replace: {{ .espansoWorkEmail2 | quote }}
 
   - trigger: ":hg"
     replace: {{ .espansoPersonalEmail | quote }}

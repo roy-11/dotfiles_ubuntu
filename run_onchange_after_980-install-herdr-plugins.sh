@@ -16,11 +16,6 @@ herdr plugin install \
   bojackduy/nvim-herdr-navigation/herdr-vim-navigator \
   --yes
 
-# herdr-reviewr: エージェントの変更差分をペイン内でレビューし、行コメントをエージェントへ送り返す
-herdr plugin install \
-  persiyanov/herdr-reviewr \
-  --yes
-
 # terminal-browser: ターミナル内で動く実ブラウザ
 # Web UI の確認やエージェントからの操作に使う
 herdr plugin install \
@@ -31,12 +26,6 @@ herdr plugin install \
 # ※初回起動時に herdr/config.toml と kitty.conf に設定を書き込む
 herdr plugin install \
   hhdebb/herdr-radar \
-  --yes
-
-# zoetrope: Claude Code / Codex のセッションをリアルタイムのフローグラフで可視化
-# ※`zoe` コマンドが必要（mise でインストール）
-herdr plugin install \
-  furkankly/zoetrope/herdr-plugin \
   --yes
 
 # herdr-navigator: ワークスペース・エージェント・プロジェクト・アクションなどへファジー検索でジャンプ

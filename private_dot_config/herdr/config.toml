@@ -74,7 +74,7 @@ toggle_sidebar = "prefix+e"
 edit_scrollback = "prefix+shift+e"
 
 # 既定キーを plugin に譲るため無効化
-goto = ""        # prefix+g → reviewr（移動は herdr-navigator を使う）
+goto = ""        # 使わない（移動は herdr-navigator を使う）
 rename_pane = "" # prefix+shift+p → plugin-manager（rename は prefix+, を使う）
 
 # ========================================
@@ -120,26 +120,12 @@ description = "Vim-aware pane right"
 # plugins
 # ------------------------------
 
-# reviewr: 差分レビューペインの開閉
-[[keys.command]]
-key = "prefix+g"
-type = "plugin_action"
-command = "persiyanov.reviewr.toggle"
-description = "reviewr: toggle review pane"
-
 # terminal-browser: 右分割でブラウザを開く
 [[keys.command]]
 key = "prefix+b"
 type = "plugin_action"
 command = "zenbu-labs.terminal-browser.open-split"
 description = "terminal-browser: open in right split"
-
-# zoetrope: エージェントのセッションをフローグラフで表示
-[[keys.command]]
-key = "prefix+shift+z"
-type = "plugin_action"
-command = "furkankly.zoetrope.open"
-description = "zoetrope: session graph"
 
 # herdr-navigator: ファジー検索でジャンプ
 [[keys.command]]
